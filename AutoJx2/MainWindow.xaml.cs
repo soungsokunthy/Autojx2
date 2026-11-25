@@ -20,7 +20,7 @@ using FlaUI.UIA3;
 
 namespace AutoJx2
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         private ILogger<MainWindow>? _logger;
         private ICredentialManager? _credentialManager;
