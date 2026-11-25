@@ -145,51 +145,120 @@ namespace AutoJx2
 
         private void RefreshProcesses()
         {
+            var gameWindows = new List<GameWindowProcess>();
+
             try
             {
-                var processes = Process.GetProcesses()
-                    .Where(p => !string.IsNullOrEmpty(p.ProcessName))
-                    .OrderBy(p => p.ProcessName)
-                    .ToList();
+                // Only list JX2Royal processes that currently expose a visible main window.
+                foreach (var process in Process.GetProcessesByName("JX2Royal"))
+                {
+                    try
+                    {
+                        process.Refresh();
+                        string title = process.MainWindowTitle;
+
+                        if (process.MainWindowHandle != IntPtr.Zero &&
+                            !string.IsNullOrWhiteSpace(title))
+                        {
+                            gameWindows.Add(new GameWindowProcess
+                            {
+                                ProcessId = process.Id,
+                                ProcessName = process.ProcessName,
+                                MainWindowTitle = title
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogDebug(ex, "Could not inspect JX2 process {ProcessId}", SafeGetProcessId(process));
+                    }
+                    finally
+                    {
+                        process.Dispose();
+                    }
+                }
 
                 if (GameProcessComboBox != null)
                 {
-                    GameProcessComboBox.ItemsSource = processes;
-                    _logger?.LogInformation("Refreshed process list. Found {Count} processes", processes.Count);
+                    GameProcessComboBox.ItemsSource = gameWindows
+                        .OrderBy(p => p.MainWindowTitle)
+                        .ToList();
+
+                    if (GameProcessComboBox.Items.Count > 0)
+                        GameProcessComboBox.SelectedIndex = 0;
+
+                    _logger?.LogInformation(
+                        "Refreshed JX2 game windows. Found {Count} visible hero windows",
+                        gameWindows.Count);
+                }
+
+                if (gameWindows.Count == 0)
+                {
+                    UpdateStatus("No visible JX2Royal game windows found");
                 }
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error refreshing processes");
-                MessageBox.Show($"Error refreshing processes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _logger?.LogError(ex, "Error refreshing JX2 game windows");
+                MessageBox.Show($"Error refreshing game windows: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private static int SafeGetProcessId(Process process)
+        {
+            try { return process.Id; }
+            catch { return -1; }
+        }
+
+        private sealed class GameWindowProcess
+        {
+            public int ProcessId { get; set; }
+            public string ProcessName { get; set; } = string.Empty;
+            public string MainWindowTitle { get; set; } = string.Empty;
         }
 
         private void AttachProcessButton_Click(object sender, RoutedEventArgs e)
         {
-            if (GameProcessComboBox?.SelectedItem is Process process && _gameAutomation != null)
+            if (GameProcessComboBox?.SelectedItem is not GameWindowProcess selected || _gameAutomation == null)
             {
-                try
-                {
-                    _attachedProcess = process;
-                    _gameAutomation.AttachToProcess(process);
-                    UpdateStatus($"Attached to {process.ProcessName} (PID: {process.Id})");
-                    
-                    // Enable start automation button
-                    if (StartAutomationButton != null)
-                        StartAutomationButton.IsEnabled = true;
-                    
-                    _logger?.LogInformation("Attached to process: {ProcessName} (PID: {ProcessId})", process.ProcessName, process.Id);
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogError(ex, "Error attaching to process");
-                    MessageBox.Show($"Error attaching to process: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                MessageBox.Show("Please select a JX2 hero window first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            else
+
+            Process? process = null;
+            try
             {
-                MessageBox.Show("Please select a process first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Reopen the process by PID because the process used during refresh was disposed.
+                process = Process.GetProcessById(selected.ProcessId);
+                process.Refresh();
+
+                if (process.HasExited || process.MainWindowHandle == IntPtr.Zero)
+                    throw new InvalidOperationException("The selected game window is no longer available. Click Refresh and select it again.");
+
+                string currentTitle = process.MainWindowTitle;
+                if (string.IsNullOrWhiteSpace(currentTitle))
+                    throw new InvalidOperationException("The selected process no longer has a visible game window. Click Refresh and try again.");
+
+                _gameAutomation.AttachToProcess(process);
+
+                _attachedProcess?.Dispose();
+                _attachedProcess = process;
+                process = null; // MainWindow now owns this Process reference.
+
+                UpdateStatus($"Attached to {currentTitle} (PID: {selected.ProcessId})");
+
+                if (StartAutomationButton != null)
+                    StartAutomationButton.IsEnabled = true;
+
+                _logger?.LogInformation(
+                    "Attached to hero window {WindowTitle} (Process: {ProcessName}, PID: {ProcessId})",
+                    currentTitle, selected.ProcessName, selected.ProcessId);
+            }
+            catch (Exception ex)
+            {
+                process?.Dispose();
+                _logger?.LogError(ex, "Error attaching to selected hero window {WindowTitle}", selected.MainWindowTitle);
+                MessageBox.Show($"Error attaching to '{selected.MainWindowTitle}': {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
