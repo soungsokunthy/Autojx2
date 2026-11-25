@@ -13,6 +13,10 @@ using AutoJx2.Interfaces;
 using AutoJx2.Services;
 using AutoJx2.Models;
 using Microsoft.Win32;
+using System.Text;
+using FlaUI.Core;
+using FlaUI.Core.AutomationElements;
+using FlaUI.UIA3;
 
 namespace AutoJx2
 {
@@ -219,6 +223,125 @@ namespace AutoJx2
             public int ProcessId { get; set; }
             public string ProcessName { get; set; } = string.Empty;
             public string MainWindowTitle { get; set; } = string.Empty;
+        }
+
+        private sealed class LauncherWindowProcess
+        {
+            public int ProcessId { get; set; }
+            public string MainWindowTitle { get; set; } = string.Empty;
+            public string DisplayText => $"{MainWindowTitle} (PID: {ProcessId})";
+        }
+
+        private void RefreshLauncherButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var launchers = new List<LauncherWindowProcess>();
+
+                foreach (var process in Process.GetProcessesByName("JX2RoyalUpdater"))
+                {
+                    try
+                    {
+                        process.Refresh();
+                        if (process.MainWindowHandle != IntPtr.Zero &&
+                            !string.IsNullOrWhiteSpace(process.MainWindowTitle))
+                        {
+                            launchers.Add(new LauncherWindowProcess
+                            {
+                                ProcessId = process.Id,
+                                MainWindowTitle = process.MainWindowTitle
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogDebug(ex, "Could not inspect launcher process {ProcessId}", SafeGetProcessId(process));
+                    }
+                    finally
+                    {
+                        process.Dispose();
+                    }
+                }
+
+                if (LauncherProcessComboBox != null)
+                {
+                    LauncherProcessComboBox.ItemsSource = launchers
+                        .OrderBy(p => p.MainWindowTitle)
+                        .ToList();
+
+                    if (LauncherProcessComboBox.Items.Count > 0)
+                        LauncherProcessComboBox.SelectedIndex = 0;
+                }
+
+                UpdateAutoLoginStatus(launchers.Count == 0
+                    ? "No visible JX2 Royal Launcher found"
+                    : $"Found {launchers.Count} visible launcher window(s)");
+
+                _logger?.LogInformation("Found {Count} visible JX2 launcher window(s)", launchers.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error refreshing launcher windows");
+                MessageBox.Show($"Error refreshing launcher windows: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void InspectLauncherButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (LauncherProcessComboBox?.SelectedItem is not LauncherWindowProcess selected)
+            {
+                MessageBox.Show("Click Refresh Launcher and select the JX2 Royal Launcher first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                using var launcherProcess = Process.GetProcessById(selected.ProcessId);
+                launcherProcess.Refresh();
+                if (launcherProcess.HasExited || launcherProcess.MainWindowHandle == IntPtr.Zero)
+                    throw new InvalidOperationException("The selected launcher window is no longer available. Refresh the launcher list.");
+
+                using var application = Application.Attach(selected.ProcessId);
+                using var automation = new UIA3Automation();
+                var window = application.GetMainWindow(automation);
+
+                if (window == null)
+                    throw new InvalidOperationException("FlaUI attached, but could not read the launcher main window.");
+
+                var report = new StringBuilder();
+                report.AppendLine($"Launcher UI inspection: {selected.MainWindowTitle}");
+                report.AppendLine($"Process ID: {selected.ProcessId}");
+                report.AppendLine($"Window: {window.Name}");
+                report.AppendLine("Controls (maximum 250):");
+
+                var controls = window.FindAllDescendants();
+                int count = Math.Min(controls.Length, 250);
+                for (int i = 0; i < count; i++)
+                {
+                    var control = controls[i];
+                    report.AppendLine(
+                        $"[{i + 1}] Type={control.ControlType}; Name={control.Name}; " +
+                        $"AutomationId={control.AutomationId}; ClassName={control.ClassName}");
+                }
+
+                if (controls.Length > count)
+                    report.AppendLine($"... {controls.Length - count} additional controls omitted.");
+
+                string output = report.ToString();
+                if (LogsTextBox != null)
+                {
+                    LogsTextBox.Text = output;
+                    LogsTextBox.ScrollToHome();
+                }
+
+                UpdateAutoLoginStatus($"Launcher UI inspected: {count} control(s). See Logs tab.");
+                _logger?.LogInformation("Inspected launcher UI for PID {ProcessId}; found {ControlCount} controls", selected.ProcessId, controls.Length);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error inspecting launcher UI for PID {ProcessId}", selected.ProcessId);
+                MessageBox.Show($"Could not inspect the launcher UI: {ex.Message}", "Launcher Inspection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void AttachProcessButton_Click(object sender, RoutedEventArgs e)
