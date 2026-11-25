@@ -270,7 +270,7 @@
                     </Grid.RowDefinitions>
                     
                     <!-- Game Path Selection -->
-                    <GroupBox Grid.Row="0" Header="Đường dẫn Game" Margin="0,0,0,10">
+                    <GroupBox Grid.Row="0" Header="Game Path" Margin="0,0,0,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -281,22 +281,22 @@
                                      Grid.Column="0" 
                                      Margin="5"
                                      IsReadOnly="True"
-                                     Text="Chưa chọn đường dẫn game"/>
+                                     Text="No game path selected"/>
                             <Button x:Name="BrowseGamePathButton" 
                                     Grid.Column="1" 
-                                    Content="📁 Chọn" 
+                                    Content="📁 Browse" 
                                     Click="BrowseGamePathButton_Click"
                                     Margin="5,0"/>
                             <Button x:Name="SaveGamePathButton" 
                                     Grid.Column="2" 
-                                    Content="💾 Lưu" 
+                                    Content="💾 Save" 
                                     Click="SaveGamePathButton_Click"
                                     Margin="5,0"/>
                         </Grid>
                     </GroupBox>
                     
                     <!-- Account Management -->
-                    <GroupBox Grid.Row="1" Header="Quản lý Account" Margin="0,0,0,10">
+                    <GroupBox Grid.Row="1" Header="Account Management" Margin="0,0,0,10">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -306,15 +306,15 @@
                             <!-- Account Actions -->
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                                 <Button x:Name="AddAccountButton" 
-                                        Content="➕ Thêm Account" 
+                                        Content="➕ Add Account" 
                                         Click="AddAccountButton_Click"
                                         Margin="0,0,5,0"/>
                                 <Button x:Name="RefreshAccountsButton" 
-                                        Content="🔄 Làm mới" 
+                                        Content="🔄 Refresh" 
                                         Click="RefreshAccountsButton_Click"
                                         Margin="5,0"/>
                                 <Button x:Name="RemoveSelectedAccountsButton" 
-                                        Content="🗑️ Xóa đã chọn" 
+                                        Content="🗑️ Remove Selected" 
                                         Click="RemoveSelectedAccountsButton_Click"
                                         Margin="5,0"/>
                             </StackPanel>
@@ -327,7 +327,7 @@
                                       MouseDoubleClick="AccountsListView_MouseDoubleClick">
                                 <ListView.View>
                                     <GridView>
-                                        <GridViewColumn Header="Chọn" Width="50">
+                                        <GridViewColumn Header="Select" Width="50">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <CheckBox IsChecked="{Binding IsSelected}" 
@@ -335,15 +335,15 @@
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
-                                        <GridViewColumn Header="Tên đăng nhập" Width="150" DisplayMemberBinding="{Binding Username}"/>
+                                        <GridViewColumn Header="Username" Width="150" DisplayMemberBinding="{Binding Username}"/>
                                         <GridViewColumn Header="Server" Width="100" DisplayMemberBinding="{Binding Server}"/>
-                                        <GridViewColumn Header="Trạng thái" Width="100">
+                                        <GridViewColumn Header="Status" Width="100">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock>
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Text" Value="🟢 Đang chạy"/>
+                                                                <Setter Property="Text" Value="🟢 Running"/>
                                                                 <Setter Property="Foreground" Value="Green"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsRunning}" Value="False">
@@ -357,17 +357,17 @@
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
-                                        <GridViewColumn Header="Ghi chú" Width="Auto" DisplayMemberBinding="{Binding Notes}"/>
+                                        <GridViewColumn Header="Notes" Width="Auto" DisplayMemberBinding="{Binding Notes}"/>
                                     </GridView>
                                 </ListView.View>
                                 <ListView.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="▶️ Khởi động Game" Click="StartGameMenuItem_Click"/>
+                                        <MenuItem Header="▶️ Start Game" Click="StartGameMenuItem_Click"/>
                                         <MenuItem Header="⏹️ Dừng Game" Click="StopGameMenuItem_Click"/>
                                         <Separator/>
-                                        <MenuItem Header="✏️ Chỉnh sửa" Click="EditAccountMenuItem_Click"/>
+                                        <MenuItem Header="✏️ Edit" Click="EditAccountMenuItem_Click"/>
                                         <MenuItem Header="👁️ Ẩn/Hiện" Click="ToggleVisibilityMenuItem_Click"/>
-                                        <MenuItem Header="🗑️ Xóa" Click="RemoveAccountMenuItem_Click"/>
+                                        <MenuItem Header="🗑️ Remove" Click="RemoveAccountMenuItem_Click"/>
                                     </ContextMenu>
                                 </ListView.ContextMenu>
                             </ListView>
@@ -375,14 +375,14 @@
                     </GroupBox>
                     
                     <!-- Status -->
-                    <GroupBox Grid.Row="2" Header="Trạng thái">
+                    <GroupBox Grid.Row="2" Header="Status">
                         <StackPanel>
                             <TextBlock x:Name="AutoLoginStatusTextBlock" 
-                                       Text="Sẵn sàng" 
+                                       Text="Ready" 
                                        FontWeight="Bold" 
                                        Margin="5"/>
                             <TextBlock x:Name="AutoLoginInfoTextBlock" 
-                                       Text="Chọn đường dẫn game và thêm account để bắt đầu" 
+                                       Text="Select a game path and add an account to get started" 
                                        Foreground="Gray" 
                                        Margin="5"/>
                         </StackPanel>
