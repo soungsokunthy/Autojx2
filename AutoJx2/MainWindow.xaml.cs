@@ -49,7 +49,7 @@ namespace AutoJx2
             _timer.Start();
             
             // Lấy services từ DI container
-            var app = Application.Current as App;
+            var app = System.Windows.Application.Current as App;
             if (app != null)
             {
                 _logger = app.ServiceProvider.GetRequiredService<ILogger<MainWindow>>();
@@ -908,7 +908,7 @@ namespace AutoJx2
                 if (_configurationManager == null || _logger == null)
                     return;
 
-                var loggerFactory = (Application.Current as App)?.ServiceProvider?.GetRequiredService<ILoggerFactory>();
+                var loggerFactory = (System.Windows.Application.Current as App)?.ServiceProvider?.GetRequiredService<ILoggerFactory>();
                 var addAccountLogger = loggerFactory?.CreateLogger<AddAccountWindow>();
                 var addAccountWindow = new AddAccountWindow(_configurationManager, addAccountLogger, ReadJx2ServerNames());
                 addAccountWindow.Owner = this;
@@ -1026,7 +1026,7 @@ namespace AutoJx2
             {
                 if (AccountsListView.SelectedItem is Models.GameAccount account && _configurationManager != null && _logger != null)
                 {
-                    var loggerFactory = (Application.Current as App)?.ServiceProvider?.GetRequiredService<ILoggerFactory>();
+                    var loggerFactory = (System.Windows.Application.Current as App)?.ServiceProvider?.GetRequiredService<ILoggerFactory>();
                     var editAccountLogger = loggerFactory?.CreateLogger<AddAccountWindow>();
                     var editAccountWindow = new AddAccountWindow(_configurationManager, editAccountLogger, account, ReadJx2ServerNames());
                     editAccountWindow.Owner = this;
