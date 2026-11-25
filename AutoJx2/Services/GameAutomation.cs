@@ -23,6 +23,7 @@ namespace AutoJx2.Services
         
         private Process? _attachedProcess;
         private Application? _application;
+        private UIA3Automation? _automation;
         private Window? _gameWindow;
         private bool _disposed = false;
         private bool _isRunning = false;
@@ -51,6 +52,15 @@ namespace AutoJx2.Services
         {
             try
             {
+                if (process == null)
+                {
+                    throw new ArgumentNullException(nameof(process));
+                }
+
+                // Keep only the PID from the UI's Process object. Reacquire a fresh
+                // Process handle because UI lists can retain stale Process instances.
+                int processId = process.Id;
+
                 lock (_lockObject)
                 {
                     if (_isRunning)
@@ -58,23 +68,51 @@ namespace AutoJx2.Services
                         StopAutomation();
                     }
 
-                    _attachedProcess = process;
-                    _application = Application.Attach(process);
-                    
-                    // Tìm game window
-                    _gameWindow = _application.GetMainWindow(new UIA3Automation());
-                    
-                    if (_gameWindow == null)
+                    // Release any previous attachment before connecting again.
+                    _gameWindow = null;
+                    _application?.Dispose();
+                    _application = null;
+                    _automation?.Dispose();
+                    _automation = null;
+                    _attachedProcess?.Dispose();
+                    _attachedProcess = null;
+
+                    _attachedProcess = Process.GetProcessById(processId);
+                    if (_attachedProcess.HasExited)
                     {
-                        throw new InvalidOperationException("Could not find game window");
+                        throw new InvalidOperationException($"Game process {processId} has already exited. Refresh the process list and try again.");
                     }
 
-                    OnStatusChanged($"Attached to process: {process.ProcessName} (PID: {process.Id})");
-                    _logger.LogInformation("Successfully attached to process: {ProcessName} (PID: {ProcessId})", process.ProcessName, process.Id);
+                    // Attach by PID rather than passing a possibly stale Process object.
+                    _application = Application.Attach(processId);
+                    _automation = new UIA3Automation();
+                    _gameWindow = _application.GetMainWindow(_automation);
+
+                    if (_gameWindow == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"FlaUI attached to PID {processId}, but could not find its main window. " +
+                            "Make sure you selected the actual JX2 game client, not its launcher.");
+                    }
+
+                    string processName = _attachedProcess.ProcessName;
+                    OnStatusChanged($"Attached to process: {processName} (PID: {processId})");
+                    _logger.LogInformation("Successfully attached to process: {ProcessName} (PID: {ProcessId})", processName, processId);
                 }
             }
             catch (Exception ex)
             {
+                lock (_lockObject)
+                {
+                    _gameWindow = null;
+                    _application?.Dispose();
+                    _application = null;
+                    _automation?.Dispose();
+                    _automation = null;
+                    _attachedProcess?.Dispose();
+                    _attachedProcess = null;
+                }
+
                 _logger.LogError(ex, "Error attaching to process");
                 OnErrorOccurred($"Failed to attach to process: {ex.Message}");
                 throw;
@@ -388,7 +426,13 @@ namespace AutoJx2.Services
             {
                 StopAutomation();
                 _cancellationTokenSource?.Dispose();
+                _gameWindow = null;
                 _application?.Dispose();
+                _application = null;
+                _automation?.Dispose();
+                _automation = null;
+                _attachedProcess?.Dispose();
+                _attachedProcess = null;
                 _disposed = true;
             }
         }
