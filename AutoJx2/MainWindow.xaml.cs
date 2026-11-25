@@ -287,6 +287,18 @@ namespace AutoJx2
             }
         }
 
+        private static string SafeControlValue(Func<string> readValue)
+        {
+            try
+            {
+                return readValue() ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                return $"<unsupported: {ex.GetType().Name}>";
+            }
+        }
+
         private void InspectLauncherButton_Click(object sender, RoutedEventArgs e)
         {
             if (LauncherProcessComboBox?.SelectedItem is not LauncherWindowProcess selected)
@@ -321,8 +333,10 @@ namespace AutoJx2
                 {
                     var control = controls[i];
                     report.AppendLine(
-                        $"[{i + 1}] Type={control.ControlType}; Name={control.Name}; " +
-                        $"AutomationId={control.AutomationId}; ClassName={control.ClassName}");
+                        $"[{i + 1}] Type={SafeControlValue(() => control.ControlType.ToString())}; " +
+                        $"Name={SafeControlValue(() => control.Name)}; " +
+                        $"AutomationId={SafeControlValue(() => control.AutomationId)}; " +
+                        $"ClassName={SafeControlValue(() => control.ClassName)}");
                 }
 
                 if (controls.Length > count)
