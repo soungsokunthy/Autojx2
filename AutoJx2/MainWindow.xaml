@@ -301,6 +301,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <ComboBox x:Name="LauncherProcessComboBox"
                                       Grid.Column="0"
@@ -316,6 +317,12 @@
                                     Content="Inspect UI"
                                     Click="InspectLauncherButton_Click"
                                     Margin="5,0"/>
+                            <Button x:Name="LaunchGameButton"
+                                    Grid.Column="3"
+                                    Content="Auto Login + Play"
+                                    Click="LaunchGameButton_Click"
+                                    Margin="5,0"
+                                    ToolTip="Use the launcher's normal AUTO LOGIN and PLAY buttons, then attach to the game window."/>
                         </Grid>
                     </GroupBox>
 
