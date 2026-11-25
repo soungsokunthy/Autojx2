@@ -9,7 +9,7 @@ using System.Windows;
 namespace AutoJx2
 {
     /// <summary>
-    /// Window để thêm account mới
+    /// Window for adding a new account
     /// </summary>
     public partial class AddAccountWindow : Window
     {
@@ -25,18 +25,18 @@ namespace AutoJx2
             _configurationManager = configurationManager;
             _logger = logger;
             
-            // Focus vào textbox đầu tiên
+            // Focus the first text box
             UsernameTextBox.Focus();
         }
 
         /// <summary>
-        /// Constructor để chỉnh sửa account
+        /// Constructor for editing an account
         /// </summary>
         public AddAccountWindow(IConfigurationManager configurationManager, ILogger<AddAccountWindow>? logger, Models.GameAccount account)
             : this(configurationManager, logger)
         {
             _editingAccount = account;
-            Title = "Chỉnh sửa Account";
+            Title = "Edit Account";
             LoadAccountData();
         }
 
@@ -50,7 +50,7 @@ namespace AutoJx2
                 ServerComboBox.Text = _editingAccount.Server;
                 NotesTextBox.Text = _editingAccount.Notes ?? "";
                 
-                // Không hiển thị mật khẩu cũ vì lý do bảo mật
+                // Do not display the existing password for security reasons
                 PasswordBox.Password = "";
                 
                 _logger?.LogInformation("Account data loaded for editing: {Username}", _editingAccount.Username);
@@ -58,7 +58,7 @@ namespace AutoJx2
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error loading account data");
-                ShowValidationMessage("Lỗi khi tải dữ liệu account");
+                ShowValidationMessage("Error loading account data");
             }
         }
 
@@ -80,7 +80,7 @@ namespace AutoJx2
 
                 if (_editingAccount != null)
                 {
-                    // Chỉnh sửa account
+                    // Update the account
                     account.Id = _editingAccount.Id;
                     account.CreatedAt = _editingAccount.CreatedAt;
                     account.IsHidden = _editingAccount.IsHidden;
@@ -92,7 +92,7 @@ namespace AutoJx2
                 }
                 else
                 {
-                    // Thêm account mới
+                    // Add a new account
                     _configurationManager.AddAccount(account);
                     _logger?.LogInformation("Account added: {Username}", account.Username);
                 }
@@ -108,7 +108,7 @@ namespace AutoJx2
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error saving account");
-                ShowValidationMessage($"Lỗi khi lưu account: {ex.Message}");
+                ShowValidationMessage($"Error saving the account: {ex.Message}");
             }
         }
 
@@ -124,36 +124,36 @@ namespace AutoJx2
 
             if (string.IsNullOrWhiteSpace(UsernameTextBox.Text))
             {
-                ShowValidationMessage("Vui lòng nhập tên đăng nhập");
+                ShowValidationMessage("Please enter a username");
                 UsernameTextBox.Focus();
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(PasswordBox.Password))
             {
-                ShowValidationMessage("Vui lòng nhập mật khẩu");
+                ShowValidationMessage("Please enter a password");
                 PasswordBox.Focus();
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(ServerComboBox.Text))
             {
-                ShowValidationMessage("Vui lòng chọn server");
+                ShowValidationMessage("Please select a server");
                 ServerComboBox.Focus();
                 return false;
             }
 
-            // Kiểm tra độ dài
+            // Validate field lengths
             if (UsernameTextBox.Text.Length < 3)
             {
-                ShowValidationMessage("Tên đăng nhập phải có ít nhất 3 ký tự");
+                ShowValidationMessage("Username must contain at least 3 characters");
                 UsernameTextBox.Focus();
                 return false;
             }
 
             if (PasswordBox.Password.Length < 4)
             {
-                ShowValidationMessage("Mật khẩu phải có ít nhất 4 ký tự");
+                ShowValidationMessage("Password must contain at least 4 characters");
                 PasswordBox.Focus();
                 return false;
             }
@@ -184,7 +184,7 @@ namespace AutoJx2
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error encrypting password");
-                throw new InvalidOperationException("Lỗi khi mã hóa mật khẩu");
+                throw new InvalidOperationException("Error encrypting the password");
             }
         }
 
@@ -192,7 +192,7 @@ namespace AutoJx2
         {
             base.OnSourceInitialized(e);
             
-            // Đặt focus vào textbox đầu tiên
+            // Focus the first text box
             UsernameTextBox.Focus();
         }
 
