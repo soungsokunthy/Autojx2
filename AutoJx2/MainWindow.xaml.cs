@@ -33,10 +33,10 @@ namespace AutoJx2
         {
             InitializeComponent();
             
-            // Khởi tạo _startTime
+            // Initialize _startTime
             _startTime = DateTime.Now;
             
-            // Khởi tạo timer để cập nhật thời gian
+            // Initialize the timer used to update elapsed time
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(1);
             _timer.Tick += Timer_Tick;
@@ -53,7 +53,7 @@ namespace AutoJx2
                 _gameProcessManager = app.ServiceProvider.GetRequiredService<IGameProcessManager>();
             }
             
-            // Khởi tạo giao diện
+            // Initialize the user interface
             InitializeUI();
         }
 
@@ -67,16 +67,16 @@ namespace AutoJx2
             _configurationManager = configurationManager;
             _gameProcessManager = gameProcessManager;
             
-            // Khởi tạo _startTime
+            // Initialize _startTime
             _startTime = DateTime.Now;
             
-            // Khởi tạo timer để cập nhật thời gian
+            // Initialize the timer used to update elapsed time
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(1);
             _timer.Tick += Timer_Tick;
             _timer.Start();
             
-            // Khởi tạo giao diện
+            // Initialize the user interface
             InitializeUI();
             
             _logger?.LogInformation("MainWindow initialized successfully");
@@ -599,7 +599,7 @@ namespace AutoJx2
                 if (_configurationManager != null && GamePathTextBox != null)
                 {
                     var gamePath = _configurationManager.GetGamePath();
-                    GamePathTextBox.Text = string.IsNullOrEmpty(gamePath) ? "Chưa chọn đường dẫn game" : gamePath;
+                    GamePathTextBox.Text = string.IsNullOrEmpty(gamePath) ? "No game path selected" : gamePath;
                 }
             }
             catch (Exception ex)
@@ -616,13 +616,13 @@ namespace AutoJx2
                 {
                     _accounts = _configurationManager.GetAccounts();
                     AccountsListView.ItemsSource = _accounts;
-                    UpdateAutoLoginStatus($"Đã tải {_accounts.Count} account");
+                    UpdateAutoLoginStatus($"Loaded {_accounts.Count} account(s)");
                 }
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error loading accounts");
-                UpdateAutoLoginStatus("Lỗi khi tải danh sách account");
+                UpdateAutoLoginStatus("Failed to load the account list");
             }
         }
 
@@ -632,7 +632,7 @@ namespace AutoJx2
             {
                 var openFileDialog = new OpenFileDialog
                 {
-                    Title = "Chọn file so2game.exe",
+                    Title = "Select so2game.exe",
                     Filter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*",
                     FileName = "so2game.exe"
                 };
@@ -648,7 +648,7 @@ namespace AutoJx2
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error browsing game path");
-                MessageBox.Show($"Lỗi khi chọn file game: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error selecting the game file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -660,26 +660,26 @@ namespace AutoJx2
                     return;
 
                 var gamePath = GamePathTextBox.Text.Trim();
-                if (string.IsNullOrEmpty(gamePath) || gamePath == "Chưa chọn đường dẫn game")
+                if (string.IsNullOrEmpty(gamePath) || gamePath == "No game path selected")
                 {
-                    MessageBox.Show("Vui lòng chọn đường dẫn game trước khi lưu.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Please select a game path before saving.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 if (!File.Exists(gamePath))
                 {
-                    MessageBox.Show("File game không tồn tại. Vui lòng kiểm tra lại đường dẫn.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("The game file does not exist. Please check the path.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 _configurationManager.SaveGamePath(gamePath);
-                UpdateAutoLoginStatus("Đường dẫn game đã được lưu");
-                MessageBox.Show("Đường dẫn game đã được lưu thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                UpdateAutoLoginStatus("Game path saved");
+                MessageBox.Show("Game path saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error saving game path");
-                MessageBox.Show($"Lỗi khi lưu đường dẫn game: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error saving the game path: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -697,7 +697,7 @@ namespace AutoJx2
                 addAccountWindow.AccountSaved += (s, account) =>
                 {
                     LoadAccounts();
-                    UpdateAutoLoginStatus($"Account '{account.Username}' đã được thêm");
+                    UpdateAutoLoginStatus($"Account '{account.Username}' has been added");
                 };
 
                 addAccountWindow.ShowDialog();
@@ -705,7 +705,7 @@ namespace AutoJx2
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error opening add account window");
-                MessageBox.Show($"Lỗi khi mở cửa sổ thêm account: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error opening the Add Account window: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -732,12 +732,12 @@ namespace AutoJx2
                 
                 if (selectedItems.Count == 0)
                 {
-                    MessageBox.Show("Vui lòng chọn account cần xóa.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Please select an account to remove.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa {selectedItems.Count} account đã chọn?", 
-                    "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBox.Show($"Are you sure you want to remove the {selectedItems.Count} selected account(s)?", 
+                    "Confirm Removal", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 
                 if (result == MessageBoxResult.Yes)
                 {
@@ -746,13 +746,13 @@ namespace AutoJx2
                         _configurationManager.RemoveAccount(account.Id);
                     }
                     LoadAccounts();
-                    UpdateAutoLoginStatus($"Đã xóa {selectedItems.Count} account");
+                    UpdateAutoLoginStatus($"Removed {selectedItems.Count} account(s)");
                 }
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error removing selected accounts");
-                MessageBox.Show($"Lỗi khi xóa account: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error removing account: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -793,7 +793,7 @@ namespace AutoJx2
                 if (AccountsListView.SelectedItem is GameAccount account && account.ProcessId.HasValue)
                 {
                     _gameProcessManager?.StopGame(account.ProcessId.Value);
-                    UpdateAutoLoginStatus($"Đã dừng game cho account '{account.Username}'");
+                    UpdateAutoLoginStatus($"Stopped the game for account '{account.Username}'");
                 }
             }
             catch (Exception ex)
@@ -815,7 +815,7 @@ namespace AutoJx2
                     editAccountWindow.AccountSaved += (s, updatedAccount) =>
                     {
                         LoadAccounts();
-                        UpdateAutoLoginStatus($"Account '{updatedAccount.Username}' đã được cập nhật");
+                        UpdateAutoLoginStatus($"Account '{updatedAccount.Username}' has been updated");
                     };
 
                     editAccountWindow.ShowDialog();
@@ -824,7 +824,7 @@ namespace AutoJx2
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error opening edit account window");
-                MessageBox.Show($"Lỗi khi mở cửa sổ chỉnh sửa account: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error opening the Edit Account window: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -837,7 +837,7 @@ namespace AutoJx2
                     account.IsHidden = !account.IsHidden;
                     _configurationManager.UpdateAccount(account);
                     LoadAccounts();
-                    UpdateAutoLoginStatus($"Account '{account.Username}' đã được {(account.IsHidden ? "ẩn" : "hiện")}");
+                    UpdateAutoLoginStatus($"Account '{account.Username}' is now {(account.IsHidden ? "hidden" : "visible")}");
                 }
             }
             catch (Exception ex)
@@ -852,21 +852,21 @@ namespace AutoJx2
             {
                 if (AccountsListView.SelectedItem is GameAccount account && _configurationManager != null)
                 {
-                    var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa account '{account.Username}'?", 
-                        "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    var result = MessageBox.Show($"Are you sure you want to remove account '{account.Username}'?", 
+                        "Confirm Removal", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     
                     if (result == MessageBoxResult.Yes)
                     {
                         _configurationManager.RemoveAccount(account.Id);
                         LoadAccounts();
-                        UpdateAutoLoginStatus($"Account '{account.Username}' đã được xóa");
+                        UpdateAutoLoginStatus($"Account '{account.Username}' has been removed");
                     }
                 }
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error removing account from context menu");
-                MessageBox.Show($"Lỗi khi xóa account: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error removing account: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -880,30 +880,30 @@ namespace AutoJx2
                 var gamePath = _configurationManager.GetGamePath();
                 if (string.IsNullOrEmpty(gamePath))
                 {
-                    MessageBox.Show("Vui lòng chọn đường dẫn game trước khi khởi động.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Please select a game path before starting the game.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 if (!File.Exists(gamePath))
                 {
-                    MessageBox.Show("File game không tồn tại. Vui lòng kiểm tra lại đường dẫn game.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("The game file does not exist. Please check the game path.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 var process = _gameProcessManager.StartGame(account, gamePath);
                 if (process != null)
                 {
-                    UpdateAutoLoginStatus($"Đã khởi động game cho account '{account.Username}'");
+                    UpdateAutoLoginStatus($"Started the game for account '{account.Username}'");
                 }
                 else
                 {
-                    UpdateAutoLoginStatus($"Không thể khởi động game cho account '{account.Username}'");
+                    UpdateAutoLoginStatus($"Unable to start the game for account '{account.Username}'");
                 }
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error starting game for account: {Username}", account.Username);
-                MessageBox.Show($"Lỗi khi khởi động game: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error starting the game: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
