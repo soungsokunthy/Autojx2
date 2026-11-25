@@ -22,7 +22,6 @@ Tool tự động hóa cho game JX2 được xây dựng bằng C# + WPF (.NET 8
 - 🔒 **Secure Storage**: Không lưu mật khẩu dưới dạng plain text
 
 ## 🛠️ Yêu cầu hệ thống
-
 - Windows 10/11
 - .NET 8.0 Runtime
 - Visual Studio 2022 hoặc .NET CLI
@@ -89,11 +88,11 @@ dotnet run --project AutoJx2
 ```
 AutoJx2/
 ├── Interfaces/          # Interface definitions
-├── Models/             # Data models
-├── Services/           # Business logic services
-├── App.xaml            # Application entry point
-├── MainWindow.xaml     # Main UI
-└── AutoJx2.csproj     # Project file
+├── Models/              # Data models
+├── Services/            # Business logic services
+├── App.xaml             # Application entry point
+├── MainWindow.xaml      # Main UI
+└── AutoJx2.csproj       # Project file
 ```
 
 ### Key Components
@@ -115,7 +114,7 @@ AutoJx2/
 - Không lưu thông tin nhạy cảm vào file cấu hình
 
 ### Sử dụng
-- Chỉ sử dụng tool này cho mục đích học tập và nghiên cứu
+- Chỉ sử dụng tool นี้សម្រាប់គោលបំណងសិក្សា និងស្រាវជ្រាវ
 - Tuân thủ Terms of Service của game
 - Sử dụng có trách nhiệm và không lạm dụng
 
@@ -125,7 +124,6 @@ AutoJx2/
 - Các placeholder methods cần được implement theo UI cụ thể của game
 
 ## 📝 TODO
-
 - [ ] Implement global hotkey registration
 - [ ] Add more automation features
 - [ ] Improve error handling
@@ -135,9 +133,7 @@ AutoJx2/
 - [ ] Implement plugin system
 
 ## 🤝 Đóng góp
-
 Mọi đóng góp đều được chào đón! Hãy:
-
 1. Fork project
 2. Tạo feature branch
 3. Commit changes
@@ -145,18 +141,14 @@ Mọi đóng góp đều được chào đón! Hãy:
 5. Tạo Pull Request
 
 ## 📄 License
-
 Project này được phân phối dưới MIT License. Xem file `LICENSE` để biết thêm chi tiết.
 
 ## ⚠️ Disclaimer
-
 Tool này được cung cấp "nguyên trạng" và chỉ dành cho mục đích giáo dục. Tác giả không chịu trách nhiệm về việc sử dụng tool này. Hãy sử dụng có trách nhiệm và tuân thủ các quy định của game.
 
 ## 📞 Liên hệ
-
 - GitHub: [@voidwalker2312](https://github.com/voidwalker2312)
 - Email: lqdinh210@gmail.com
 
 ---
-
 **Happy Gaming! 🎮**
