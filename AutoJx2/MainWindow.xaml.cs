@@ -287,6 +287,123 @@ namespace AutoJx2
             }
         }
 
+        private async void LaunchGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (LauncherProcessComboBox?.SelectedItem is not LauncherWindowProcess selected)
+            {
+                MessageBox.Show("Click Refresh Launcher and select the JX2 Royal Launcher first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (LaunchGameButton != null)
+                LaunchGameButton.IsEnabled = false;
+
+            try
+            {
+                UpdateAutoLoginStatus("Connecting to JX2 Royal Launcher...");
+                using var launcherProcess = Process.GetProcessById(selected.ProcessId);
+                launcherProcess.Refresh();
+                if (launcherProcess.HasExited || launcherProcess.MainWindowHandle == IntPtr.Zero)
+                    throw new InvalidOperationException("The selected launcher window is no longer available. Refresh the launcher list.");
+
+                using var application = FlaUIApplication.Attach(selected.ProcessId);
+                using var automation = new UIA3Automation();
+                var window = application.GetMainWindow(automation);
+                if (window == null)
+                    throw new InvalidOperationException("Could not access the launcher window.");
+
+                var autoLoginButton = window.FindFirstDescendant(cf => cf.ByAutomationId("auto-login"))?.AsButton();
+                if (autoLoginButton == null)
+                    throw new InvalidOperationException("Could not find the launcher's AUTO LOGIN button (auto-login).");
+
+                UpdateAutoLoginStatus("Clicking AUTO LOGIN...");
+                autoLoginButton.Invoke();
+                await Task.Delay(2000);
+
+                UpdateAutoLoginStatus("Checking PLAY button...");
+                var playButton = window.FindFirstDescendant(cf => cf.ByAutomationId("launch-action"))?.AsButton();
+                if (playButton == null)
+                    throw new InvalidOperationException("Could not find the launcher's PLAY button (launch-action).");
+
+                var waitUntil = DateTime.UtcNow.AddSeconds(30);
+                while (!playButton.IsEnabled && DateTime.UtcNow < waitUntil)
+                {
+                    await Task.Delay(500);
+                    playButton = window.FindFirstDescendant(cf => cf.ByAutomationId("launch-action"))?.AsButton();
+                    if (playButton == null)
+                        throw new InvalidOperationException("The launcher's PLAY button disappeared.");
+                }
+
+                if (!playButton.IsEnabled)
+                    throw new TimeoutException("The PLAY button did not become enabled within 30 seconds.");
+
+                UpdateAutoLoginStatus("Clicking PLAY...");
+                playButton.Invoke();
+
+                UpdateAutoLoginStatus("Waiting for the JX2 game window...");
+                var gameWindowFound = false;
+                var gameWaitUntil = DateTime.UtcNow.AddSeconds(60);
+                while (DateTime.UtcNow < gameWaitUntil)
+                {
+                    foreach (var process in Process.GetProcessesByName("JX2Royal"))
+                    {
+                        try
+                        {
+                            process.Refresh();
+                            if (!process.HasExited &&
+                                process.MainWindowHandle != IntPtr.Zero &&
+                                !string.IsNullOrWhiteSpace(process.MainWindowTitle))
+                            {
+                                gameWindowFound = true;
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.LogDebug(ex, "Could not inspect starting JX2 game process");
+                        }
+                        finally
+                        {
+                            process.Dispose();
+                        }
+                    }
+
+                    if (gameWindowFound)
+                        break;
+
+                    await Task.Delay(1000);
+                }
+
+                if (!gameWindowFound)
+                    throw new TimeoutException("The launcher was asked to PLAY, but no visible JX2Royal game window appeared within 60 seconds.");
+
+                RefreshProcesses();
+                var gameWindow = GameProcessComboBox?.Items
+                    .OfType<GameWindowProcess>()
+                    .FirstOrDefault(p => p.MainWindowTitle.Contains("JX2", StringComparison.OrdinalIgnoreCase));
+
+                if (gameWindow == null)
+                    throw new InvalidOperationException("The game process started, but its window was not found in the Game Process list. Click Refresh and attach manually.");
+
+                if (GameProcessComboBox != null)
+                    GameProcessComboBox.SelectedItem = gameWindow;
+
+                AttachProcessButton_Click(this, new RoutedEventArgs());
+                UpdateAutoLoginStatus($"Game launched; attached to {gameWindow.MainWindowTitle}.");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error running launcher Auto Login + Play sequence");
+                UpdateAutoLoginStatus($"Launch sequence stopped: {ex.Message}");
+                MessageBox.Show($"Auto Login + Play could not complete: {ex.Message}", "Launcher Automation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            finally
+            {
+                if (LaunchGameButton != null)
+                    LaunchGameButton.IsEnabled = true;
+            }
+        }
+
         private static string SafeControlValue(Func<string> readValue)
         {
             try
