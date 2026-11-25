@@ -51,7 +51,8 @@
                             <ComboBox x:Name="GameProcessComboBox" 
                                       Grid.Column="0" 
                                       Margin="5"
-                                      DisplayMemberPath="ProcessName"/>
+                                      DisplayMemberPath="MainWindowTitle"
+                                      ToolTip="Select the JX2 hero window to attach to"/>
                             <Button x:Name="RefreshProcessesButton" 
                                     Grid.Column="1" 
                                     Content="🔄 Refresh" 
