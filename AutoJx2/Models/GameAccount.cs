@@ -3,32 +3,32 @@ using System;
 namespace AutoJx2.Models
 {
     /// <summary>
-    /// Model chứa thông tin account game
+    /// Model containing game account information
     /// </summary>
     public class GameAccount
     {
         /// <summary>
-        /// ID duy nhất của account
+        /// Unique account ID
         /// </summary>
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
-        /// Tên đăng nhập
+        /// Username
         /// </summary>
         public string Username { get; set; } = string.Empty;
 
         /// <summary>
-        /// Mật khẩu (đã được mã hóa)
+        /// Password (encrypted)
         /// </summary>
         public string Password { get; set; } = string.Empty;
 
         /// <summary>
-        /// Tên server
+        /// Server name
         /// </summary>
         public string Server { get; set; } = string.Empty;
 
         /// <summary>
-        /// Thời gian tạo
+        /// Creation timestamp
         /// </summary>
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
@@ -38,27 +38,27 @@ namespace AutoJx2.Models
         public DateTime LastUpdated { get; set; } = DateTime.Now;
 
         /// <summary>
-        /// Có bị ẩn không
+        /// Whether the account is hidden
         /// </summary>
         public bool IsHidden { get; set; } = false;
 
         /// <summary>
-        /// Ghi chú bổ sung
+        /// Additional notes
         /// </summary>
         public string? Notes { get; set; }
 
         /// <summary>
-        /// Process ID của game đang chạy (nếu có)
+        /// Process ID of the running game, if available
         /// </summary>
         public int? ProcessId { get; set; }
 
         /// <summary>
-        /// Có đang chạy game không
+        /// Whether the game is currently running
         /// </summary>
         public bool IsRunning { get; set; } = false;
 
         /// <summary>
-        /// Có được chọn trong ListView không (không lưu vào file)
+        /// Whether the item is selected in the ListView (not persisted to file)
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public bool IsSelected { get; set; } = false;
