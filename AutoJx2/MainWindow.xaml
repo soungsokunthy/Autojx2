@@ -166,13 +166,11 @@
                                          Margin="5"/>
                             
                             <Label Grid.Row="2" Grid.Column="0" Content="Server:"/>
-                            <ComboBox x:Name="ServerComboBox" 
-                                      Grid.Row="2" Grid.Column="1" 
-                                      Margin="5">
-                                <ComboBoxItem Content="Server 1"/>
-                                <ComboBoxItem Content="Server 2"/>
-                                <ComboBoxItem Content="Server 3"/>
-                            </ComboBox>
+                            <ComboBox x:Name="ServerComboBox"
+                                      Grid.Row="2" Grid.Column="1"
+                                      Margin="5"
+                                      IsEditable="True"
+                                      ToolTip="Server names are read from the JX2 launcher configuration file."/>
                         </Grid>
                     </GroupBox>
                     
