@@ -28,6 +28,7 @@ namespace AutoJx2
         private bool _isAutomationRunning = false;
         private DateTime _startTime;
         private List<Models.GameAccount> _accounts = new List<Models.GameAccount>();
+        private const string Jx2UserDataIniPath = @"H:\Software\JX2RoyalLauncher\JX2 Royal\UserData\uiCommon.ini";
 
         public MainWindow()
         {
@@ -86,6 +87,9 @@ namespace AutoJx2
         {
             try
             {
+                // Load server names from the JX2 launcher configuration before loading saved credentials.
+                LoadJx2ServerNames();
+
                 // Load credentials
                 LoadCredentials();
                 
@@ -505,6 +509,96 @@ namespace AutoJx2
             }
         }
 
+
+        private List<string> ReadJx2ServerNames()
+        {
+            var serverNames = new List<string>();
+
+            try
+            {
+                if (!File.Exists(Jx2UserDataIniPath))
+                {
+                    _logger?.LogWarning("JX2 launcher configuration file was not found: {Path}", Jx2UserDataIniPath);
+                    return serverNames;
+                }
+
+                var inLoginSection = false;
+                var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var rawLine in File.ReadAllLines(Jx2UserDataIniPath, System.Text.Encoding.UTF8))
+                {
+                    var line = rawLine.Trim();
+                    if (line.Length == 0 || line.StartsWith(";") || line.StartsWith("#"))
+                        continue;
+
+                    if (line.StartsWith("[") && line.EndsWith("]"))
+                    {
+                        inLoginSection = string.Equals(line, "[Login]", StringComparison.OrdinalIgnoreCase);
+                        continue;
+                    }
+
+                    if (!inLoginSection)
+                        continue;
+
+                    var separator = line.IndexOf('=');
+                    if (separator <= 0)
+                        continue;
+
+                    var key = line.Substring(0, separator).Trim();
+                    var value = line.Substring(separator + 1).Trim();
+                    values[key] = value;
+                }
+
+                void AddServerName(string? value)
+                {
+                    if (!string.IsNullOrWhiteSpace(value) &&
+                        !serverNames.Contains(value.Trim(), StringComparer.OrdinalIgnoreCase))
+                    {
+                        serverNames.Add(value.Trim());
+                    }
+                }
+
+                if (values.TryGetValue("LastGameServer", out var lastGameServer))
+                    AddServerName(lastGameServer);
+
+                for (var i = 0; i <= 6; i++)
+                {
+                    if (values.TryGetValue($"LastSelName{i}", out var rememberedName))
+                        AddServerName(rememberedName);
+                }
+
+                _logger?.LogInformation("Loaded {Count} JX2 server name(s) from launcher configuration", serverNames.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error reading JX2 launcher server configuration");
+            }
+
+            return serverNames;
+        }
+
+        private void LoadJx2ServerNames()
+        {
+            var serverNames = ReadJx2ServerNames();
+            if (ServerComboBox == null)
+                return;
+
+            var savedServer = ServerComboBox.Text;
+            ServerComboBox.ItemsSource = serverNames;
+
+            if (serverNames.Count > 0)
+            {
+                ServerComboBox.SelectedItem = serverNames.FirstOrDefault(
+                    name => string.Equals(name, savedServer, StringComparison.OrdinalIgnoreCase))
+                    ?? serverNames[0];
+            }
+            else
+            {
+                ServerComboBox.Text = savedServer;
+                UpdateStatus("JX2 server list not found. Check the launcher configuration path.");
+            }
+        }
+
         private void LoadCredentials()
         {
             try
@@ -692,7 +786,7 @@ namespace AutoJx2
 
                 var loggerFactory = (Application.Current as App)?.ServiceProvider?.GetRequiredService<ILoggerFactory>();
                 var addAccountLogger = loggerFactory?.CreateLogger<AddAccountWindow>();
-                var addAccountWindow = new AddAccountWindow(_configurationManager, addAccountLogger);
+                var addAccountWindow = new AddAccountWindow(_configurationManager, addAccountLogger, null, ReadJx2ServerNames());
                 addAccountWindow.Owner = this;
                 addAccountWindow.AccountSaved += (s, account) =>
                 {
@@ -810,7 +904,7 @@ namespace AutoJx2
                 {
                     var loggerFactory = (Application.Current as App)?.ServiceProvider?.GetRequiredService<ILoggerFactory>();
                     var editAccountLogger = loggerFactory?.CreateLogger<AddAccountWindow>();
-                    var editAccountWindow = new AddAccountWindow(_configurationManager, editAccountLogger, account);
+                    var editAccountWindow = new AddAccountWindow(_configurationManager, editAccountLogger, account, ReadJx2ServerNames());
                     editAccountWindow.Owner = this;
                     editAccountWindow.AccountSaved += (s, updatedAccount) =>
                     {
