@@ -786,7 +786,7 @@ namespace AutoJx2
 
                 var loggerFactory = (Application.Current as App)?.ServiceProvider?.GetRequiredService<ILoggerFactory>();
                 var addAccountLogger = loggerFactory?.CreateLogger<AddAccountWindow>();
-                var addAccountWindow = new AddAccountWindow(_configurationManager, addAccountLogger, null, ReadJx2ServerNames());
+                var addAccountWindow = new AddAccountWindow(_configurationManager, addAccountLogger, ReadJx2ServerNames());
                 addAccountWindow.Owner = this;
                 addAccountWindow.AccountSaved += (s, account) =>
                 {
