@@ -264,6 +264,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     
@@ -293,8 +294,33 @@
                         </Grid>
                     </GroupBox>
                     
+                    <!-- Launcher Inspection -->
+                    <GroupBox Grid.Row="1" Header="JX2 Royal Launcher" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="LauncherProcessComboBox"
+                                      Grid.Column="0"
+                                      Margin="5"
+                                      DisplayMemberPath="DisplayText"
+                                      IsEditable="False"
+                                      ToolTip="Select the visible JX2 Royal Launcher process."/>
+                            <Button Grid.Column="1"
+                                    Content="Refresh Launcher"
+                                    Click="RefreshLauncherButton_Click"
+                                    Margin="5,0"/>
+                            <Button Grid.Column="2"
+                                    Content="Inspect UI"
+                                    Click="InspectLauncherButton_Click"
+                                    Margin="5,0"/>
+                        </Grid>
+                    </GroupBox>
+
                     <!-- Account Management -->
-                    <GroupBox Grid.Row="1" Header="Account Management" Margin="0,0,0,10">
+                    <GroupBox Grid.Row="2" Header="Account Management" Margin="0,0,0,10">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -373,7 +399,7 @@
                     </GroupBox>
                     
                     <!-- Status -->
-                    <GroupBox Grid.Row="2" Header="Status">
+                    <GroupBox Grid.Row="3" Header="Status">
                         <StackPanel>
                             <TextBlock x:Name="AutoLoginStatusTextBlock" 
                                        Text="Ready" 
