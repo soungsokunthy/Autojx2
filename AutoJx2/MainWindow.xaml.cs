@@ -15,6 +15,7 @@ using AutoJx2.Models;
 using Microsoft.Win32;
 using System.Text;
 using FlaUI.Core;
+using FlaUIApplication = FlaUI.Core.Application;
 using FlaUI.Core.AutomationElements;
 using FlaUI.UIA3;
 
@@ -301,7 +302,7 @@ namespace AutoJx2
                 if (launcherProcess.HasExited || launcherProcess.MainWindowHandle == IntPtr.Zero)
                     throw new InvalidOperationException("The selected launcher window is no longer available. Refresh the launcher list.");
 
-                using var application = Application.Attach(selected.ProcessId);
+                using var application = FlaUIApplication.Attach(selected.ProcessId);
                 using var automation = new UIA3Automation();
                 var window = application.GetMainWindow(automation);
 
