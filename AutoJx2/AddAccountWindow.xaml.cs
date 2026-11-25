@@ -2,6 +2,8 @@ using AutoJx2.Interfaces;
 using AutoJx2.Models;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
@@ -19,12 +21,18 @@ namespace AutoJx2
 
         public event EventHandler<Models.GameAccount>? AccountSaved;
 
-        public AddAccountWindow(IConfigurationManager configurationManager, ILogger<AddAccountWindow>? logger)
+        public AddAccountWindow(IConfigurationManager configurationManager, ILogger<AddAccountWindow>? logger,
+            IEnumerable<string>? availableServers = null)
         {
             InitializeComponent();
             _configurationManager = configurationManager;
             _logger = logger;
-            
+
+            var serverNames = availableServers?.ToList() ?? new List<string>();
+            ServerComboBox.ItemsSource = serverNames;
+            if (serverNames.Count > 0)
+                ServerComboBox.SelectedIndex = 0;
+
             // Focus the first text box
             UsernameTextBox.Focus();
         }
@@ -32,8 +40,9 @@ namespace AutoJx2
         /// <summary>
         /// Constructor for editing an account
         /// </summary>
-        public AddAccountWindow(IConfigurationManager configurationManager, ILogger<AddAccountWindow>? logger, Models.GameAccount account)
-            : this(configurationManager, logger)
+        public AddAccountWindow(IConfigurationManager configurationManager, ILogger<AddAccountWindow>? logger,
+            Models.GameAccount account, IEnumerable<string>? availableServers = null)
+            : this(configurationManager, logger, availableServers)
         {
             _editingAccount = account;
             Title = "Edit Account";
