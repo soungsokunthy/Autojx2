@@ -347,7 +347,7 @@
                                                                 <Setter Property="Foreground" Value="Green"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsRunning}" Value="False">
-                                                                        <Setter Property="Text" Value="🔴 Dừng"/>
+                                                                        <Setter Property="Text" Value="🔴 Stopped"/>
                                                                         <Setter Property="Foreground" Value="Red"/>
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
@@ -363,7 +363,7 @@
                                 <ListView.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="▶️ Start Game" Click="StartGameMenuItem_Click"/>
-                                        <MenuItem Header="⏹️ Dừng Game" Click="StopGameMenuItem_Click"/>
+                                        <MenuItem Header="⏹️ Stop Game" Click="StopGameMenuItem_Click"/>
                                         <Separator/>
                                         <MenuItem Header="✏️ Edit" Click="EditAccountMenuItem_Click"/>
                                         <MenuItem Header="👁️ Ẩn/Hiện" Click="ToggleVisibilityMenuItem_Click"/>
